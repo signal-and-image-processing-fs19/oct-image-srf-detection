@@ -2,7 +2,6 @@ import glob
 import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import ImageOps
 from skimage import io, color
 from skimage.feature import canny
 from skimage.filters import try_all_threshold, threshold_otsu, gaussian
@@ -15,25 +14,26 @@ def main():
     #simple_binarization_example('Train-Data/SRF/input_1492_1.png')
     images = glob.glob('Train-Data/SRF/*')
     images = images + glob.glob('Train-Data/NoSRF/*')
-    for i in images[:3]:
+    for i in images:
         orig = io.imread(i)
-        orig_bin = otsu_binar(orig)
-        orig_bin_crop = crop(orig_bin)
-        plot_original_and_processed(orig, orig_bin_crop, 'otsu')
+        orig_crop = crop(orig)
+        plot_original_and_processed(orig, orig_crop, 'cropped')
 
 
-def crop(img_bin):
+def crop(img):
 
     #crop the white border
-    border = (50,50,50,50) #left, up, right, bottom
-    img_no_border = ImageOps.crop(img_bin, border)
+    border = 50
+    img_no_border = img[border:img.shape[0]-border, border:img.shape[1]-border]
+
+    #make a binary picture
+    img_bin = otsu_binar(img_no_border)
 
     #search the 4 outest white pixels, crop the image there
-    white_pixels = np.where(img_no_border == 1)
+    white_pixels = np.where(img_bin == 1)
     up, bottom = min(white_pixels[0]), max(white_pixels[0])
     left, right = min(white_pixels[1]), max(white_pixels[1])
-    border =(left, up, img_no_border.shape[1]-right, img_no_border.shape[0]-bottom)
-    img_crop = ImageOps.crop(img_no_border, border)
+    img_crop = img_no_border[up:bottom, left:right]
 
     return img_crop
 
