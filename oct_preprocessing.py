@@ -4,7 +4,6 @@ from skimage import io, color
 from skimage.feature import canny
 from skimage.filters import try_all_threshold
 matplotlib.rcParams['image.cmap'] = 'gray'
-matplotlib.rcParams['image.interpolation'] = 'nearest'
 
 
 def main():
