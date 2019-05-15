@@ -1,8 +1,8 @@
-import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from skimage import io, color
 from skimage.feature import canny
+from skimage.filters import try_all_threshold
 matplotlib.rcParams['image.cmap'] = 'gray'
 matplotlib.rcParams['image.interpolation'] = 'nearest'
 
@@ -13,7 +13,12 @@ def main():
 
 
 def simple_binarization_example(filepath):
-    pass
+    orig = io.imread(filepath)
+
+    orig = color.rgb2gray(orig)
+
+    fig, ax = try_all_threshold(orig, figsize=(10, 8), verbose=False)
+    plt.show()
 
 
 def simple_canny_example(filepath):
