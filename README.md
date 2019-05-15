@@ -14,6 +14,9 @@ Textbook example of sub-retinal fluid:
 ![srfexample](srf.png?raw=true "srfexample")
 
 ## Run ##
+Created on Python version: 3.7.3
+
+
 Clone the project and run the following command from the root folder to install all dependencies.
 
 ```python
