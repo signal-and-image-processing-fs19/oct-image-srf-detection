@@ -11,10 +11,10 @@ matplotlib.rcParams['image.cmap'] = 'gray'
 def main():
     #     VARIOUS TESTING
     # simple_canny_example('Train-Data/SRF/input_1492_1.png')
-    # simple_binarization_example('Train-Data/SRF/input_1492_1.png')
+    simple_binarization_example('Train-Data/SRF/input_1492_1.png')
     images = glob.glob('Train-Data/SRF/*')
     images = images + glob.glob('Train-Data/NoSRF/*')
-    for i in images[:1]:
+    for i in images:
         orig = io.imread(i)
         orig_crop = crop(orig)
         plot_original_and_processed(orig, orig_crop, 'cropped')
@@ -33,14 +33,14 @@ def testing_hist_equalize(img):
     plt.show()
 
 
-def crop(img):
+def crop(img, border=50):
 
     # crop the white border
-    border = 50
+    border = border
     img_no_border = img[border:img.shape[0]-border, border:img.shape[1]-border]
 
     # make a binary picture
-    img_bin = otsu_binar(img_no_border)
+    img_bin = otsu_binar(img_no_border, 10)
 
     # search the 4 outest white pixels, crop the image there
     white_pixels = np.where(img_bin == 1)
