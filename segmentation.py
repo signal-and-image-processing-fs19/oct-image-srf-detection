@@ -3,7 +3,7 @@
 Comparing edge-based and region-based segmentation
 ==================================================
 
-Try to detect the white line in the images
+Try to detect the fluids
 code from https://scikit-image.org/docs/dev/auto_examples/applications/plot_coins_segmentation.html
 """
 
@@ -17,7 +17,7 @@ from oct_preprocessing import crop
 from scipy import ndimage as ndi
 
 #img = data.img()
-images = glob.glob('Train-Data/SRF/*')
+images = glob.glob('Train-Data/NoSRF/*')
 for i in images:
     orig = plt.imread(i)
     orig_crop = crop(orig)
@@ -44,6 +44,8 @@ for i in images:
     markers = np.zeros_like(img)
     markers[img < 10] = 2
     markers[img > 160] = 1
+
+    #markers with value <130 and >160 could be used to detect the white line
 
     segmentation = morphology.watershed(elevation_map, markers)
 
