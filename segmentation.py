@@ -42,7 +42,7 @@ for i in images:
 
     # Next we find markers of the background
     markers = np.zeros_like(img)
-    markers[img < 130] = 2
+    markers[img < 10] = 2
     markers[img > 160] = 1
 
     segmentation = morphology.watershed(elevation_map, markers)

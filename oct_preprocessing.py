@@ -11,7 +11,7 @@ matplotlib.rcParams['image.cmap'] = 'gray'
 def main():
     #     VARIOUS TESTING
     # simple_canny_example('Train-Data/SRF/input_1492_1.png')
-    simple_binarization_example('Train-Data/SRF/input_1492_1.png')
+    #simple_binarization_example('Train-Data/SRF/input_1492_1.png')
     images = glob.glob('Train-Data/SRF/*')
     images = images + glob.glob('Train-Data/NoSRF/*')
     for i in images:
