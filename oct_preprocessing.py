@@ -21,17 +21,22 @@ def main():
         testing_hist_equalize(orig_crop)
 
 
-def testing_hist_equalize(img):
+def testing_hist_equalize(img, plotting=False):
     orig_crop = color.rgb2gray(img) * 255
     orig_crop = orig_crop.astype(np.uint8)
-    plt.subplot(221); plt.hist(orig_crop.flatten(), 256, range=(0, 256))
-    plt.subplot(222); plt.imshow(orig_crop)
+
     eq = exposure.equalize_hist(orig_crop) * 255
     eq = eq.astype(np.uint8)
-    plt.subplot(223); plt.hist(eq.flatten(), 256, range=(0, 256))
-    plt.subplot(224); plt.imshow(eq)
-    plt.show()
 
+    if plotting:
+        plt.subplot(221); plt.hist(orig_crop.flatten(), 256, range=(0, 256))
+        plt.subplot(222); plt.imshow(orig_crop)
+
+        plt.subplot(223); plt.hist(eq.flatten(), 256, range=(0, 256))
+        plt.subplot(224); plt.imshow(eq)
+        plt.show()
+
+    return eq
 
 def crop(img, border=50):
 

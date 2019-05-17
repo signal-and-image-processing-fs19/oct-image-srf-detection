@@ -13,15 +13,17 @@ import glob
 from skimage import color, morphology
 from skimage.feature import canny
 from skimage.filters import gaussian, sobel
-from oct_preprocessing import crop
+from oct_preprocessing import crop, testing_hist_equalize
 from scipy import ndimage as ndi
+
 
 #img = data.img()
 images = glob.glob('Train-Data/NoSRF/*')
 for i in images:
     orig = plt.imread(i)
     orig_crop = crop(orig)
-    img = color.rgb2gray(orig_crop)
+
+    img = testing_hist_equalize(orig_crop)
 
     #HOW MUCH BLURRING? HIGH SIGMA DECREASE THE NOISE BUT ALSO THE POWER
     img_blur = gaussian(img, sigma=0)
