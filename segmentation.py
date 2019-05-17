@@ -42,7 +42,7 @@ for i in images:
 
     # Next we find markers of the background
     markers = np.zeros_like(img)
-    markers[img < 10] = 2
+    markers[img < 30] = 2
     markers[img > 160] = 1
 
     #markers with value <130 and >160 could be used to detect the white line
