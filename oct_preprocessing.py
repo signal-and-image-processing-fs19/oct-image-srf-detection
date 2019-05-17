@@ -1,3 +1,4 @@
+import os
 import glob
 import matplotlib
 import numpy as np
@@ -17,9 +18,10 @@ def main():
     for i in images:
         orig = io.imread(i)
         orig_crop = crop(orig)
-        plot_original_and_processed(orig, orig_crop, 'cropped')
-        testing_hist_equalize(orig_crop)
+        #plot_original_and_processed(orig, orig_crop, 'cropped')
+        eq = testing_hist_equalize(orig_crop)
 
+        io.imsave(i+'hist.png', eq)
 
 def testing_hist_equalize(img, plotting=False):
     orig_crop = color.rgb2gray(img) * 255
