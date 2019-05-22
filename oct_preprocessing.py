@@ -14,9 +14,11 @@ def main():
     #     VARIOUS TESTING
     # simple_canny_example('Train-Data/SRF/input_1492_1.png')
     #simple_binarization_example('Train-Data/SRF/input_1492_1.png')
-    images = glob.glob('Train-Data/SRF/*')
-    images = images + glob.glob('Train-Data/NoSRF/*')
-    for i in images:
+    images_SRF = glob.glob('Train-Data/SRF/*')
+    images_NO = glob.glob('Train-Data/NoSRF/*')
+
+    class_SRF = []
+    for i in images_SRF:
         orig = io.imread(i)
         orig_crop = crop(orig)
 
@@ -32,7 +34,93 @@ def main():
 
         kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7,7))
         opened_eq = cv.morphologyEx(eq, cv.MORPH_OPEN, kernel)
-        plot_original_and_processed(eq, opened_eq, 'opened_eq')
+        #plot_original_and_processed(eq, opened_eq, 'opened_eq')
+
+        res, img, meth = template_matching(opened_eq, i)
+
+        min_val = np.amin(res)
+
+        class_SRF.append(min_val)
+
+
+        #plt.subplot(121), plt.imshow(res, cmap='gray')
+        #plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+        #plt.subplot(122), plt.imshow(img, cmap='gray')
+        #plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+        #plt.suptitle('{} , {} , {}'.format(meth, i, str(min_val)))
+        #plt.show()
+
+
+    class_NO = []
+    for i in images_NO:
+        orig = io.imread(i)
+        orig_crop = crop(orig)
+
+        # plot_original_and_processed(orig, orig_crop, 'cropped')
+
+        eq = testing_hist_equalize(orig_crop)
+        # io.imsave('equalized_histograms/'+i+'hist.png', eq)
+        # plot_original_and_processed(orig_crop, eq, 'hist_equalized')
+
+        # kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
+        # opened = cv.morphologyEx(orig_crop, cv.MORPH_OPEN, kernel)
+        # plot_original_and_processed(orig_crop, opened, 'opened')
+
+        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7, 7))
+        opened_eq = cv.morphologyEx(eq, cv.MORPH_OPEN, kernel)
+        # plot_original_and_processed(eq, opened_eq, 'opened_eq')
+
+        res, img, meth = template_matching(opened_eq, i)
+
+        min_val = np.amin(res)
+
+        class_NO.append(min_val)
+
+    for thresh in range(3000000, 5000000, 100000):
+        tp = 0
+        count = 0
+
+        for i in class_SRF:
+            count += 1
+            if i <= thresh:
+                tp += 1
+
+        for i in class_NO:
+            count += 1
+            if i > thresh:
+                tp += 1
+
+        precision = tp / count
+        print(thresh, ':\t', precision, '% ', tp, '/', count)
+
+def template_matching(img, path):
+    img2 = img.copy()
+    template = io.imread('dummy_template.png')
+    w, h = template.shape[::-1]
+
+    # All the 6 methods for comparison in a list
+    methods = ['cv.TM_SQDIFF']  # 'cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR', 'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED'
+
+    for meth in methods:
+        img = img2.copy()
+        method = eval(meth)
+
+        # Apply template Matching
+        res = cv.matchTemplate(img, template, method)
+        min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
+
+        # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
+        if method in [cv.TM_SQDIFF, cv.TM_SQDIFF_NORMED]:
+            top_left = min_loc
+        else:
+            top_left = max_loc
+        bottom_right = (top_left[0] + w, top_left[1] + h)
+
+        cv.rectangle(img, top_left, bottom_right, 255, 2)
+
+        return res, img, meth
+
+
 
 
 def testing_hist_equalize(img, plotting=False):
