@@ -2,6 +2,7 @@ import os
 import glob
 import matplotlib
 import numpy as np
+import cv2 as cv
 import matplotlib.pyplot as plt
 from skimage import io, color, exposure
 from skimage.feature import canny
@@ -18,10 +19,21 @@ def main():
     for i in images:
         orig = io.imread(i)
         orig_crop = crop(orig)
-        #plot_original_and_processed(orig, orig_crop, 'cropped')
-        eq = testing_hist_equalize(orig_crop)
 
-        io.imsave('equalized_histograms/'+i+'hist.png', eq)
+        #plot_original_and_processed(orig, orig_crop, 'cropped')
+
+        eq = testing_hist_equalize(orig_crop)
+        #io.imsave('equalized_histograms/'+i+'hist.png', eq)
+        #plot_original_and_processed(orig_crop, eq, 'hist_equalized')
+
+        #kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
+        #opened = cv.morphologyEx(orig_crop, cv.MORPH_OPEN, kernel)
+        #plot_original_and_processed(orig_crop, opened, 'opened')
+
+        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7,7))
+        opened_eq = cv.morphologyEx(eq, cv.MORPH_OPEN, kernel)
+        plot_original_and_processed(eq, opened_eq, 'opened_eq')
+
 
 def testing_hist_equalize(img, plotting=False):
     orig_crop = color.rgb2gray(img) * 255
