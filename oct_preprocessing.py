@@ -44,7 +44,7 @@ def crop(img, border=50):
     # make a binary picture
     img_bin = otsu_binarize(img_no_border, 10)
 
-    # search the 4 outest white pixels, crop the image there
+    # search the 4 outermost white pixels, crop the image there
     white_pixels = np.where(img_bin == 1)
     up, bottom = min(white_pixels[0]), max(white_pixels[0])
     left, right = min(white_pixels[1]), max(white_pixels[1])
@@ -54,6 +54,7 @@ def crop(img, border=50):
 
 
 def hist_equalize(img):
+    """Return a histogram equalized version of the image (enhances 'contrast')."""
     if len(img.shape) == 3:
         img = color.rgb2gray(img) * 255
         img = img.astype(np.uint8)
