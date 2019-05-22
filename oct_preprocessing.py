@@ -22,13 +22,18 @@ from skimage import color, exposure
 from skimage.filters import threshold_otsu, gaussian
 
 
-def otsu_binar(orig, sigma=1):
-    orig = color.rgb2gray(orig)
-    orig_blur = gaussian(orig, sigma=sigma)
-    otsu_thresh = threshold_otsu(orig_blur)
-    orig_bin = orig_blur > otsu_thresh
+def otsu_binarize(img, sigma=1):
+    """Return binarized image by using otsu thresholding."""
+    if len(img.shape) == 3:
+        img = color.rgb2gray(img)
+    elif len(img.shape) != 2:
+        raise ValueError('Cannot handle unknown Image dimension!')
 
-    return orig_bin
+    img_blur = gaussian(img, sigma=sigma)
+    otsu_thresh = threshold_otsu(img_blur)
+    img_bin = img_blur > otsu_thresh
+
+    return img_bin
 
 
 def crop(img, border=50):
