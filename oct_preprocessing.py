@@ -17,6 +17,7 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 
 import numpy as np
+import cv2 as cv
 from skimage import color, exposure
 from skimage.filters import threshold_otsu, gaussian
 
@@ -70,3 +71,12 @@ def hist_equalize(img):
     eq = eq.astype(np.uint8)
 
     return eq
+
+
+def opening_denoising(img, kernel_size=5):
+    """Denoise image by opening (erosion then dilation)."""
+
+    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (kernel_size, kernel_size))
+    img_denoise = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
+
+    return img_denoise

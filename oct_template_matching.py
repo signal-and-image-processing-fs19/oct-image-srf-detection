@@ -49,12 +49,3 @@ def template_matching(image, template, meth='cv.TM_SQDIFF'):
     cv.rectangle(img, top_left, bottom_right, 255, 2)
 
     return res, img
-
-
-def opening_denoising(img, kernel_size=5):
-    """Denoise image by opening (erosion then dilation)."""
-
-    kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (kernel_size, kernel_size))
-    img_denoise = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
-
-    return img_denoise
