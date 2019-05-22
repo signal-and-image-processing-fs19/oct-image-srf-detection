@@ -21,7 +21,7 @@ def main():
         #plot_original_and_processed(orig, orig_crop, 'cropped')
         eq = testing_hist_equalize(orig_crop)
 
-        io.imsave(i+'hist.png', eq)
+        io.imsave('equalized_histograms/'+i+'hist.png', eq)
 
 def testing_hist_equalize(img, plotting=False):
     orig_crop = color.rgb2gray(img) * 255
