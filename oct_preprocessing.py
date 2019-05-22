@@ -23,7 +23,7 @@ from skimage.filters import threshold_otsu, gaussian
 
 
 def otsu_binarize(img, sigma=1):
-    """Return binarized image by using otsu thresholding."""
+    """Return binarized image by using gaussian blurring and otsu thresholding."""
     if len(img.shape) == 3:
         img = color.rgb2gray(img)
     elif len(img.shape) != 2:
@@ -37,13 +37,13 @@ def otsu_binarize(img, sigma=1):
 
 
 def crop(img, border=50):
-
+    """Return cropped image using a binarized version of that image as a mask to define the relevant region."""
     # crop the white border
     border = border
     img_no_border = img[border:img.shape[0]-border, border:img.shape[1]-border]
 
     # make a binary picture
-    img_bin = otsu_binar(img_no_border, 10)
+    img_bin = otsu_binarize(img_no_border, 10)
 
     # search the 4 outest white pixels, crop the image there
     white_pixels = np.where(img_bin == 1)
