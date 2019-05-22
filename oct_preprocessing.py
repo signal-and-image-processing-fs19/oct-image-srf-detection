@@ -17,7 +17,6 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 
 import numpy as np
-import matplotlib.pyplot as plt
 from skimage import color, exposure
 from skimage.filters import threshold_otsu, gaussian
 
@@ -54,19 +53,19 @@ def crop(img, border=50):
     return img_crop
 
 
-def testing_hist_equalize(img, plotting=False):
-    orig_crop = color.rgb2gray(img) * 255
-    orig_crop = orig_crop.astype(np.uint8)
+def hist_equalize(img):
+    if len(img.shape) == 3:
+        img = color.rgb2gray(img) * 255
+        img = img.astype(np.uint8)
 
-    eq = exposure.equalize_hist(orig_crop) * 255
+    elif len(img.shape) != 2:
+        raise ValueError('Cannot handle unknown Image dimension!')
+
+    if np.amax(img) <= 1 and img.dtype != np.uint8:
+        img = img * 255
+        img = img.astype(np.uint8)
+
+    eq = exposure.equalize_hist(img) * 255
     eq = eq.astype(np.uint8)
-
-    if plotting:
-        plt.subplot(221); plt.hist(orig_crop.flatten(), 256, range=(0, 256))
-        plt.subplot(222); plt.imshow(orig_crop)
-
-        plt.subplot(223); plt.hist(eq.flatten(), 256, range=(0, 256))
-        plt.subplot(224); plt.imshow(eq)
-        plt.show()
 
     return eq
