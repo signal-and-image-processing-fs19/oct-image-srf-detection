@@ -1,4 +1,9 @@
 """
+EXPERIMENTING CODE TO GET TO KNOW THE PROBLEM/TASK
+
+not used in the final build, just for reference.
+
+
 ==================================================
 Comparing edge-based and region-based segmentation
 ==================================================
