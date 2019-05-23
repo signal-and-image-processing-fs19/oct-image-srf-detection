@@ -29,12 +29,12 @@ def main():
     preproc_methods = ['crop', 'eq', 'opening']
     matching_method = 'cv.TM_SQDIFF'
 
-    min_dist_srf = tmpmatch.run_matching(images_srf, template_path, preproc_methods, matching_method)
+    best_scores_srf = tmpmatch.run_matching(images_srf, template_path, preproc_methods, matching_method)
 
-    min_dist_no = tmpmatch.run_matching(images_no, template_path, preproc_methods, matching_method)
+    best_scores_no = tmpmatch.run_matching(images_no, template_path, preproc_methods, matching_method)
 
     # testing range of thresholds
-    tmpmatch.eval_precision(2000000, 6000000, 50000, min_dist_srf, min_dist_no, preproc_methods, matching_method)
+    tmpmatch.eval_precision(2000000, 6000000, 50000, best_scores_srf, best_scores_no, preproc_methods, matching_method)
 
 
 if __name__ == '__main__':

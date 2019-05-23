@@ -27,8 +27,19 @@ matplotlib.rcParams['image.cmap'] = 'gray'
 
 
 def run_matching(image_paths, template_path, preprocessing_methods, matching_method='cv.TM_SQDIFF'):
+    """Run a matching task on a list of images (paths), with specified preprocessing and matching methods.
+
+    :param image_paths:
+    :param template_path:
+    :param preprocessing_methods: list of preprocessing method names (strings). Available:
+        'crop', 'eq', 'opening'
+    :param matching_method: template matching method. Available:
+        'cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
+        'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED'
+    :return: list of best matching score for each image
+    """
     template = io.imread(template_path)
-    min_distances = []
+    best_scores = []
     for i in image_paths:
         img_orig = io.imread(i)
         img = img_orig.copy()
@@ -46,10 +57,13 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
         res, img = template_matching(img, template, matching_method)
 
         # store minimum value found (best match)
-        min_val = np.amin(res)
-        min_distances.append(min_val)
+        # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
+        if matching_method in ['cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']:
+            best_scores.append(np.amin(res))
+        else:
+            best_scores.append(np.amax(res))
 
-    return min_distances
+    return best_scores
 
 
 def template_matching(image, template, meth='cv.TM_SQDIFF'):
@@ -57,7 +71,7 @@ def template_matching(image, template, meth='cv.TM_SQDIFF'):
 
     :param image: input image in which to search for the template matching (either rgb or grayscale)
     :param template: kernel/template which to match against the input image
-    :param meth: template matching method. one of the following:
+    :param meth: template matching method. Available:
         'cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
         'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED'
     :return: res: the distance map of the template matching the input image
@@ -85,6 +99,16 @@ def template_matching(image, template, meth='cv.TM_SQDIFF'):
 
 
 def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods, matching_method):
+    """Evaluate precision of the system for a range of thresholds.
+
+    :param low: lower threshold boundary
+    :param upp: upper threshold boundary
+    :param stp: threshold step size
+    :param min_dist_srf: list of minimum distances of each SRF image
+    :param min_dist_no: list of minimum distances of each non-SRF image
+    :param preproc_methods: list of preprocessing method names (strings)
+    :param matching_method: matching method name (string)
+    """
     precisions = []
     for thresh in range(low, upp, stp):
         tp = 0
@@ -92,13 +116,19 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods, ma
 
         for i in min_dist_srf:
             count += 1
-            if i <= thresh:
+            if i >= thresh:
                 tp += 1
 
         for i in min_dist_no:
             count += 1
-            if i > thresh:
+            if i < thresh:
                 tp += 1
+
+        # If the method is TM_SQDIFF or TM_SQDIFF_NORMED,
+        # smaller scores are better, else larger score are better matching.
+        # Thus inverse true positives
+        if matching_method in ['cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']:
+            tp = count - tp
 
         precision = tp / count
         precisions.append(precision)
