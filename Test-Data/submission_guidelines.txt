@@ -1,0 +1,10 @@
+Submission Guidelines
+
+- The submission will consist of at least 2 files, a .csv and a .py file
+- The submission will be in the csv file format using the "," delimiter
+- The submission filename will contain the last names of the team members, example: project_skywalker_solo_hutt.csv
+- The submission will contain a header "filename, label" as the example_submission.csv file
+- The submission will contain the results of all 100 images
+- B-Scans containing SRF are labeled as 1, non-SRF as 0
+- A .py file named project_lastname1_lastname2_lastname3.py should run and produce a .csv file identical to your .csv submitted file. Code that does not produce and save such file will not be considered. Include all necessary code files to run the .py submission 
+- If possible please include a list of package requirements
