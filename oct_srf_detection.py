@@ -19,55 +19,22 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 
 import glob
-import matplotlib
-import numpy as np
-from skimage import io
-import matplotlib.pyplot as plt
-import oct_preprocessing as preproc
 import oct_template_matching as tmpmatch
-
-matplotlib.rcParams['image.cmap'] = 'gray'
 
 
 def main():
     images_srf = glob.glob('Train-Data/SRF/*')
-    images_NOsrf = glob.glob('Train-Data/NoSRF/*')
+    images_no = glob.glob('Train-Data/NoSRF/*')
     template_path = 'dummy_template.png'
     preproc_methods = ['crop', 'eq', 'opening']
     matching_method = 'cv.TM_SQDIFF'
 
     min_dist_srf = tmpmatch.run_matching(images_srf, template_path, preproc_methods, matching_method)
 
-    min_dist_NOsrf = tmpmatch.run_matching(images_NOsrf, template_path, preproc_methods, matching_method)
+    min_dist_no = tmpmatch.run_matching(images_no, template_path, preproc_methods, matching_method)
 
     # testing range of thresholds
-    precisions = []
-    low = 2000000
-    upp = 6000000
-    stp = 50000
-    for thresh in range(low, upp, stp):
-        tp = 0
-        count = 0
-
-        for i in min_dist_srf:
-            count += 1
-            if i <= thresh:
-                tp += 1
-
-        for i in min_dist_NOsrf:
-            count += 1
-            if i > thresh:
-                tp += 1
-
-        precision = tp / count
-        precisions.append(precision)
-        print(thresh, ':\t', precision, '% ', tp, '/', count)
-
-    plt.plot(range(low//1000, upp//1000, stp//1000), precisions)
-    plt.xlabel('threshold (x1000)')
-    plt.ylabel('precision')
-    plt.title(', '.join(preproc_methods) + ', ' + matching_method)
-    plt.show()
+    tmpmatch.eval_precision(2000000, 6000000, 50000, min_dist_srf, min_dist_no, preproc_methods, matching_method)
 
 
 if __name__ == '__main__':

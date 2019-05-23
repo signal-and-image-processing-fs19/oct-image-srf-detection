@@ -19,7 +19,11 @@ __email__ = "dominik.meise@students.unibe.ch"
 import cv2 as cv
 import numpy as np
 from skimage import io
+import matplotlib
+import matplotlib.pyplot as plt
 import oct_preprocessing as preproc
+
+matplotlib.rcParams['image.cmap'] = 'gray'
 
 
 def run_matching(image_paths, template_path, preprocessing_methods, matching_method='cv.TM_SQDIFF'):
@@ -46,6 +50,7 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
         min_distances.append(min_val)
 
     return min_distances
+
 
 def template_matching(image, template, meth='cv.TM_SQDIFF'):
     """Match the template against the image, return resolution and location map.
@@ -77,3 +82,30 @@ def template_matching(image, template, meth='cv.TM_SQDIFF'):
     cv.rectangle(img, top_left, bottom_right, 255, 2)
 
     return res, img
+
+
+def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods, matching_method):
+    precisions = []
+    for thresh in range(low, upp, stp):
+        tp = 0
+        count = 0
+
+        for i in min_dist_srf:
+            count += 1
+            if i <= thresh:
+                tp += 1
+
+        for i in min_dist_no:
+            count += 1
+            if i > thresh:
+                tp += 1
+
+        precision = tp / count
+        precisions.append(precision)
+        print(thresh, ':\t', precision, '% ', tp, '/', count)
+
+    plt.plot(range(low//1000, upp//1000, stp//1000), precisions)
+    plt.xlabel('threshold (x1000)')
+    plt.ylabel('precision')
+    plt.title(', '.join(preproc_methods) + ', ' + matching_method)
+    plt.show()
