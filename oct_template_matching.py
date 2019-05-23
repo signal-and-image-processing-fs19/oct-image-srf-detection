@@ -17,7 +17,35 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 
 import cv2 as cv
+import numpy as np
+from skimage import io
+import oct_preprocessing as preproc
 
+
+def run_matching(image_paths, template_path, preprocessing_methods, matching_method='cv.TM_SQDIFF'):
+    template = io.imread(template_path)
+    min_distances = []
+    for i in image_paths:
+        img_orig = io.imread(i)
+        img = img_orig.copy()
+
+        # preprocessing
+        if 'crop' in preprocessing_methods:
+            img = preproc.crop(img)
+        if 'eq' in preprocessing_methods:
+            img = preproc.hist_equalize(img)
+        if 'opening' in preprocessing_methods:
+            img = preproc.opening_denoising(img)
+        # TODO: add all other preprocessing options and decide on ordering
+
+        # matching
+        res, img = template_matching(img, template, matching_method)
+
+        # store minimum value found (best match)
+        min_val = np.amin(res)
+        min_distances.append(min_val)
+
+    return min_distances
 
 def template_matching(image, template, meth='cv.TM_SQDIFF'):
     """Match the template against the image, return resolution and location map.

@@ -31,39 +31,14 @@ matplotlib.rcParams['image.cmap'] = 'gray'
 
 def main():
     images_srf = glob.glob('Train-Data/SRF/*')
-    images_no = glob.glob('Train-Data/NoSRF/*')
-    template = io.imread('dummy_template.png')
-    method = 'cv.TM_SQDIFF'
+    images_NOsrf = glob.glob('Train-Data/NoSRF/*')
+    template_path = 'dummy_template.png'
+    preproc_methods = ['crop', 'eq', 'opening']
+    matching_method = 'cv.TM_SQDIFF'
 
-    class_srf = []
-    for i in images_srf:
-        # preprocessing
-        img_orig = io.imread(i)
-        img_crop = preproc.crop(img_orig)
-        img_eq = preproc.hist_equalize(img_crop)
-        img_denoise = preproc.opening_denoising(img_eq)
+    min_dist_srf = tmpmatch.run_matching(images_srf, template_path, preproc_methods, matching_method)
 
-        # matching
-        res, img = tmpmatch.template_matching(img_denoise, template)
-
-        # store minimum value found (best match)
-        min_val = np.amin(res)
-        class_srf.append(min_val)
-
-    class_no = []
-    for i in images_no:
-        # preprocessing
-        img_orig = io.imread(i)
-        img_crop = preproc.crop(img_orig)
-        img_eq = preproc.hist_equalize(img_crop)
-        img_denoise = preproc.opening_denoising(img_eq)
-
-        # matching
-        res, img = tmpmatch.template_matching(img_denoise, template, method)
-
-        # store minimum value found (best match)
-        min_val = np.amin(res)
-        class_no.append(min_val)
+    min_dist_NOsrf = tmpmatch.run_matching(images_NOsrf, template_path, preproc_methods, matching_method)
 
     # testing range of thresholds
     precisions = []
@@ -74,12 +49,12 @@ def main():
         tp = 0
         count = 0
 
-        for i in class_srf:
+        for i in min_dist_srf:
             count += 1
             if i <= thresh:
                 tp += 1
 
-        for i in class_no:
+        for i in min_dist_NOsrf:
             count += 1
             if i > thresh:
                 tp += 1
@@ -91,7 +66,7 @@ def main():
     plt.plot(range(low//1000, upp//1000, stp//1000), precisions)
     plt.xlabel('threshold (x1000)')
     plt.ylabel('precision')
-    plt.title(method)
+    plt.title(', '.join(preproc_methods) + ', ' + matching_method)
     plt.show()
 
 
