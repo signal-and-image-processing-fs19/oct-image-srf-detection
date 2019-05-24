@@ -25,7 +25,7 @@ import oct_template_matching as tmpmatch
 def main():
     images_srf = glob.glob('Train-Data/SRF/*')
     images_no = glob.glob('Train-Data/NoSRF/*')
-    template_path = 'dummy_template_crop_eq_opening.png'
+    template_path = ''
     preproc_methods = ['crop', 'eq', 'opening']
     matching_method = 'cv.TM_SQDIFF'
     denoise_strength = 7

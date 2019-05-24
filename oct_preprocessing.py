@@ -28,8 +28,11 @@ def load_img_as_gray(img_path):
     return (color.rgb2gray(img) * 255).astype(np.uint8)
 
 
-def load_preproc_template():
-    pass
+def load_preproc_template(template_path, preproc_methods, denoise_strength):
+    """Create template from fixed region of the first train-data srf image, but with the given preprocessing applied."""
+    tmpl = load_img_as_gray('Train-Data/SRF/input_1492_1.png')
+    tmpl = perform_bulk_perproc(tmpl, preproc_methods, denoise_strength)
+    return tmpl[100:140, 300:340]
 
 
 def perform_bulk_perproc(image, preprocessing_methods, denoise_strength):

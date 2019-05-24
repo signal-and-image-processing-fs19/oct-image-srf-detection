@@ -43,7 +43,7 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
     :return: list of best matching score for each image
     """
     if template_path == '':
-        template = preproc.load_preproc_template(template_path)
+        template = preproc.load_preproc_template(template_path, preprocessing_methods, denoise_strength)
     else:
         template = preproc.load_img_as_gray(template_path)
 
