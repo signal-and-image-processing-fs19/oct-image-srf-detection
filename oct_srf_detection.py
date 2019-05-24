@@ -28,10 +28,14 @@ def main():
     template_path = 'dummy_template_crop_eq_opening.png'
     preproc_methods = ['crop', 'eq', 'opening']
     matching_method = 'cv.TM_SQDIFF'
+    denoise_strength = 7
+    debug = False
 
-    best_scores_srf = tmpmatch.run_matching(images_srf, template_path, preproc_methods, matching_method)
+    best_scores_srf = tmpmatch.run_matching(images_srf, template_path, preproc_methods,
+                                            matching_method, denoise_strength, debug)
 
-    best_scores_no = tmpmatch.run_matching(images_no, template_path, preproc_methods, matching_method)
+    best_scores_no = tmpmatch.run_matching(images_no, template_path, preproc_methods,
+                                           matching_method, denoise_strength, debug)
 
     # testing range of thresholds
     tmpmatch.eval_precision(0, 6000000, 1000, best_scores_srf, best_scores_no, preproc_methods, matching_method)

@@ -27,7 +27,8 @@ import oct_preprocessing as preproc
 matplotlib.rcParams['image.cmap'] = 'gray'
 
 
-def run_matching(image_paths, template_path, preprocessing_methods, matching_method='cv.TM_SQDIFF'):
+def run_matching(image_paths, template_path, preprocessing_methods, matching_method='cv.TM_SQDIFF',
+                 denoise_strength=20, debug=False):
     """Run a matching task on a list of images (paths), with specified preprocessing and matching methods.
 
     :param image_paths:
@@ -37,30 +38,25 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
     :param matching_method: template matching method. Available:
         'cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
         'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED'
+    :param denoise_strength: integer to specify how aggresively denoising should be applied.
+    :param debug: boolean to enable debugging outputs (plots or print-statememts)
     :return: list of best matching score for each image
     """
-    template = io.imread(template_path)
-    template = (color.rgb2gray(template)*255).astype(np.uint8)
+    if template_path == '':
+        template = preproc.load_preproc_template(template_path)
+    else:
+        template = preproc.load_img_as_gray(template_path)
 
     best_scores = []
     print('\nProcess and match images...\n')
     for i in tqdm(image_paths):
-        img_orig = io.imread(i)
-        img = img_orig.copy()
+        img_orig = preproc.load_img_as_gray(i)
 
         # preprocessing
-        if 'crop' in preprocessing_methods:
-            img = preproc.crop(img)
+        img = preproc.perform_bulk_perproc(img_orig, preprocessing_methods, denoise_strength)
 
-        img = (color.rgb2gray(img)*255).astype(np.uint8)
-
-        if 'eq' in preprocessing_methods:
-            img = preproc.hist_equalize(img)
-        if 'opening' in preprocessing_methods:
-            img = preproc.opening_denoising(img)
-        if 'nonloc' in preprocessing_methods:
-            img = cv.fastNlMeansDenoising(img, h=40)  # TODO: find best h (strength of denoising)
-        # TODO: add all other preprocessing options and decide on ordering
+        if debug:
+            plot_original_and_processed(img_orig, img, ', '.join(preprocessing_methods))
 
         # matching
         res, img = template_matching(img, template, matching_method)
@@ -144,8 +140,22 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods, ma
         precisions.append(precision)
         # print(thresh, ':\t', precision, '% ', tp, '/', count)
 
+    print('Best precision:' + str(max(precisions)))
+
     plt.plot(range(low//1000, upp//1000, stp//1000), precisions)
     plt.xlabel('threshold (x1000)')
     plt.ylabel('precision')
     plt.title(', '.join(preproc_methods) + ', ' + matching_method)
+    plt.show()
+
+
+def plot_original_and_processed(original, processed, process_title=''):
+
+    fig, axs = plt.subplots(1, 2)
+
+    axs[0].imshow(original)
+    axs[0].set_title('original image')
+    axs[1].imshow(processed)
+    axs[1].set_title(process_title)
+
     plt.show()

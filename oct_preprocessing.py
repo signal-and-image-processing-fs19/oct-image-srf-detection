@@ -18,8 +18,41 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 import numpy as np
 import cv2 as cv
-from skimage import color, exposure
+from skimage import io, color, exposure
 from skimage.filters import threshold_otsu, gaussian
+
+
+def load_img_as_gray(img_path):
+    """Read in rgb image and convert it to gray-scale 0-255 uint8 np array."""
+    img = io.imread(img_path)
+    return (color.rgb2gray(img) * 255).astype(np.uint8)
+
+
+def load_preproc_template():
+    pass
+
+
+def perform_bulk_perproc(image, preprocessing_methods, denoise_strength):
+    """Perform all specified preprocessing steps as a bulk task.
+
+    :param image: original unprocessed image
+    :param preprocessing_methods: list of preprocessing method names (strings). Available:
+        'crop', 'eq', 'opening', 'nonloc'
+    :param denoise_strength: integer to specify how aggresively denoising should be applied.
+    :return: processed image
+    """
+    img = image.copy()
+    if 'crop' in preprocessing_methods:
+        img = crop(img)
+    if 'eq' in preprocessing_methods:
+        img = hist_equalize(img)
+    if 'opening' in preprocessing_methods:
+        img = opening_denoising(img, kernel_size=denoise_strength)
+    if 'nonloc' in preprocessing_methods:
+        img = cv.fastNlMeansDenoising(img, h=denoise_strength)  # TODO: find best h (strength of denoising)
+    # TODO: add all other preprocessing options and decide on ordering
+
+    return img
 
 
 def otsu_binarize(img, sigma=1):
