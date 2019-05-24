@@ -18,9 +18,10 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 import cv2 as cv
 import numpy as np
-from skimage import io
+from skimage import io, color
 import matplotlib
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 import oct_preprocessing as preproc
 
 matplotlib.rcParams['image.cmap'] = 'gray'
@@ -32,25 +33,33 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
     :param image_paths:
     :param template_path:
     :param preprocessing_methods: list of preprocessing method names (strings). Available:
-        'crop', 'eq', 'opening'
+        'crop', 'eq', 'opening', 'nonloc'
     :param matching_method: template matching method. Available:
         'cv.TM_CCOEFF', 'cv.TM_CCOEFF_NORMED', 'cv.TM_CCORR',
         'cv.TM_CCORR_NORMED', 'cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED'
     :return: list of best matching score for each image
     """
     template = io.imread(template_path)
+    template = (color.rgb2gray(template)*255).astype(np.uint8)
+
     best_scores = []
-    for i in image_paths:
+    print('\nProcess and match images...\n')
+    for i in tqdm(image_paths):
         img_orig = io.imread(i)
         img = img_orig.copy()
 
         # preprocessing
         if 'crop' in preprocessing_methods:
             img = preproc.crop(img)
+
+        img = (color.rgb2gray(img)*255).astype(np.uint8)
+
         if 'eq' in preprocessing_methods:
             img = preproc.hist_equalize(img)
         if 'opening' in preprocessing_methods:
             img = preproc.opening_denoising(img)
+        if 'nonloc' in preprocessing_methods:
+            img = cv.fastNlMeansDenoising(img, h=40)  # TODO: find best h (strength of denoising)
         # TODO: add all other preprocessing options and decide on ordering
 
         # matching
@@ -110,6 +119,7 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods, ma
     :param matching_method: matching method name (string)
     """
     precisions = []
+    print('\nCalculating precision for thresholds {} to {}...\n'.format(low, upp))
     for thresh in range(low, upp, stp):
         tp = 0
         count = 0
@@ -132,7 +142,7 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods, ma
 
         precision = tp / count
         precisions.append(precision)
-        print(thresh, ':\t', precision, '% ', tp, '/', count)
+        # print(thresh, ':\t', precision, '% ', tp, '/', count)
 
     plt.plot(range(low//1000, upp//1000, stp//1000), precisions)
     plt.xlabel('threshold (x1000)')

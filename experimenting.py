@@ -14,24 +14,31 @@ import matplotlib.pyplot as plt
 from skimage import io, color, exposure
 from skimage.feature import canny
 from skimage.filters import try_all_threshold, threshold_otsu, gaussian
+import oct_preprocessing as preproc
+import oct_template_matching as tmpmatch
+
 matplotlib.rcParams['image.cmap'] = 'gray'
 
 
 def main():
     #     VARIOUS TESTING
-    # simple_canny_example('/Train-Data/SRF/input_1492_1.png')
-    # simple_binarization_example('/Train-Data/SRF/input_1492_1.png')
-    images_srf = glob.glob('/Train-Data/SRF/*')
-    images_no = glob.glob('/Train-Data/NoSRF/*')
+    # simple_canny_example('Train-Data/SRF/input_1492_1.png')
+    # simple_binarization_example('Train-Data/SRF/input_1492_1.png')
+    images = glob.glob('Train-Data/SRF/*')
+    images = images + glob.glob('Train-Data/NoSRF/*')
+    template = io.imread('dummy_template_crop_eq_nonloc.png')
+
+    template = (color.rgb2gray(template)*255).astype(np.uint8)
 
     class_srf = []
-    for i in images_srf:
+    for i in images:
         orig = io.imread(i)
         orig_crop = crop(orig)
+        orig_crop = (color.rgb2gray(orig_crop) * 255).astype(np.uint8)
 
-        # plot_original_and_processed(orig, orig_crop, 'cropped')
+        eq = preproc.hist_equalize(orig_crop)
+        img_denois = cv.fastNlMeansDenoising(eq, h=40)
 
-        eq = testing_hist_equalize(orig_crop)
         # io.imsave('experimenting/equalized_histograms/'+i+'hist.png', eq)
         # plot_original_and_processed(orig_crop, eq, 'hist_equalized')
 
@@ -39,64 +46,22 @@ def main():
         # opened = cv.morphologyEx(orig_crop, cv.MORPH_OPEN, kernel)
         # plot_original_and_processed(orig_crop, opened, 'opened')
 
-        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7,7))
-        opened_eq = cv.morphologyEx(eq, cv.MORPH_OPEN, kernel)
+        # kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7,7))
+        # opened_eq = cv.morphologyEx(eq, cv.MORPH_OPEN, kernel)
         # plot_original_and_processed(eq, opened_eq, 'opened_eq')
 
-        res, img, meth = template_matching(opened_eq, i)
+        res, img = tmpmatch.template_matching(img_denois, template)
 
         min_val = np.amin(res)
 
         class_srf.append(min_val)
 
-        # plt.subplot(121), plt.imshow(res, cmap='gray')
-        # plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-        # plt.subplot(122), plt.imshow(img, cmap='gray')
-        # plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
-        # plt.suptitle('{} , {} , {}'.format(meth, i, str(min_val)))
-        # plt.show()
-
-    class_no = []
-    for i in images_no:
-        orig = io.imread(i)
-        orig_crop = crop(orig)
-
-        # plot_original_and_processed(orig, orig_crop, 'cropped')
-
-        eq = testing_hist_equalize(orig_crop)
-        # io.imsave('equalized_histograms/'+i+'hist.png', eq)
-        # plot_original_and_processed(orig_crop, eq, 'hist_equalized')
-
-        # kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (5,5))
-        # opened = cv.morphologyEx(orig_crop, cv.MORPH_OPEN, kernel)
-        # plot_original_and_processed(orig_crop, opened, 'opened')
-
-        kernel = cv.getStructuringElement(cv.MORPH_ELLIPSE, (7, 7))
-        opened_eq = cv.morphologyEx(eq, cv.MORPH_OPEN, kernel)
-        # plot_original_and_processed(eq, opened_eq, 'opened_eq')
-
-        res, img, meth = template_matching(opened_eq, i)
-
-        min_val = np.amin(res)
-
-        class_no.append(min_val)
-
-    for thresh in range(3000000, 5000000, 100000):
-        tp = 0
-        count = 0
-
-        for i in class_srf:
-            count += 1
-            if i <= thresh:
-                tp += 1
-
-        for i in class_no:
-            count += 1
-            if i > thresh:
-                tp += 1
-
-        precision = tp / count
-        print(thresh, ':\t', precision, '% ', tp, '/', count)
+        plt.subplot(121), plt.imshow(res, cmap='gray')
+        plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
+        plt.subplot(122), plt.imshow(img, cmap='gray')
+        plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+        plt.suptitle('{} , {}'.format(i, str(min_val)))
+        plt.show()
 
 
 def template_matching(img, path):

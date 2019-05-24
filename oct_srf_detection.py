@@ -25,7 +25,7 @@ import oct_template_matching as tmpmatch
 def main():
     images_srf = glob.glob('Train-Data/SRF/*')
     images_no = glob.glob('Train-Data/NoSRF/*')
-    template_path = 'dummy_template.png'
+    template_path = 'dummy_template_crop_eq_opening.png'
     preproc_methods = ['crop', 'eq', 'opening']
     matching_method = 'cv.TM_SQDIFF'
 
@@ -34,7 +34,7 @@ def main():
     best_scores_no = tmpmatch.run_matching(images_no, template_path, preproc_methods, matching_method)
 
     # testing range of thresholds
-    tmpmatch.eval_precision(2000000, 6000000, 50000, best_scores_srf, best_scores_no, preproc_methods, matching_method)
+    tmpmatch.eval_precision(0, 6000000, 1000, best_scores_srf, best_scores_no, preproc_methods, matching_method)
 
 
 if __name__ == '__main__':
