@@ -18,11 +18,13 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 import cv2 as cv
 import numpy as np
-from skimage import io, color
+from skimage import io, color, transform
 import matplotlib
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import oct_preprocessing as preproc
+
+
 
 matplotlib.rcParams['image.cmap'] = 'gray'
 
@@ -159,3 +161,10 @@ def plot_original_and_processed(original, processed, process_title=''):
     axs[1].set_title(process_title)
 
     plt.show()
+
+def pyramid(img):
+    '''
+    returns downscaled and smoothed image (with scikit-image)
+    :param img: image as uint8, grayscaled
+    '''
+    return transform.pyramid_gaussian(img, downscale=2)
