@@ -29,7 +29,7 @@ def main():
     preproc_methods = ['crop', 'eq', 'opening']
     matching_method = 'cv.TM_SQDIFF'
     denoise_strength = 7
-    debug = False
+    debug = True
 
     best_scores_srf = tmpmatch.run_matching(images_srf, template_path, preproc_methods,
                                             matching_method, denoise_strength, debug)

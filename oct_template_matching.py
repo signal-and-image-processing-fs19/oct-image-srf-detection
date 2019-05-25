@@ -62,7 +62,10 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
 
         #downscale image with scalefactor
         scale = 0.76
-        img = pyramid(img, scale)
+        img2 = pyramid(img, scale)
+
+        if debug:
+            plot_original_and_processed(img, img2)
 
         # matching
         res, img = template_matching(img, template, matching_method)
@@ -73,8 +76,6 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
             best_scores.append(np.amin(res))
         else:
             best_scores.append(np.amax(res))
-
-
 
     return best_scores
 
