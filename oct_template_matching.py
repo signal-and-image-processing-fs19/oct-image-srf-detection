@@ -44,10 +44,9 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
         template = preproc.load_img_as_gray(template_path)
 
     best_scores = []
-    for i in image_paths:
-
-        if debug:
-            print('Processing {}...'.format(i))
+    print('\n')
+    for index, i in enumerate(image_paths):
+        print('\rProcessing {} ({}/{})...'.format(i, index, len(image_paths)), end='')
 
         img_orig = preproc.load_img_as_gray(i)
 

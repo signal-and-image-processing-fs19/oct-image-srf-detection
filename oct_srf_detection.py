@@ -119,5 +119,5 @@ def run_all_combinations():
 
 
 if __name__ == '__main__':
-    run_one_setting()
-    # run_all_combinations()
+    # run_one_setting()
+    run_all_combinations()
