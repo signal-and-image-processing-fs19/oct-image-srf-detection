@@ -36,7 +36,7 @@ def run_one_setting():
     preproc_methods = ['crop', 'eq', 'opening']
     matching_method = 'cv.TM_SQDIFF'
     denoise_strength = 7
-    debug = False
+    debug = True
 
     best_scores_srf = tmpmatch.run_matching(images_srf, template_path, preproc_methods,
                                             matching_method, denoise_strength, debug)
@@ -119,5 +119,5 @@ def run_all_combinations():
 
 
 if __name__ == '__main__':
-    # run_one_setting()
-    run_all_combinations()
+    run_one_setting()
+    # run_all_combinations()

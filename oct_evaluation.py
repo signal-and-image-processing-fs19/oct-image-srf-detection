@@ -17,8 +17,11 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from sklearn import metrics
+
+matplotlib.rcParams['image.cmap'] = 'gray'
 
 
 def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods,
