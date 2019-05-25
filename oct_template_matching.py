@@ -60,12 +60,8 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
         if debug:
             plot_original_and_processed(img_orig, img, ', '.join(preprocessing_methods))
 
-        #downscale image with scalefactor
-        scale = 0.76
-        img2 = pyramid(img, scale)
-
-        if debug:
-            plot_original_and_processed(img, img2)
+        #create image pyramid
+        img = pyramid(img)
 
         # matching
         res, img = template_matching(img, template, matching_method)
@@ -176,17 +172,37 @@ def plot_original_and_processed(original, processed, process_title=''):
     plt.show()
 
 
-def pyramid(img, scale):
+def pyramid(img):
     '''
     returns downscaled and smoothed image (with scikit-image)
     :param img: image as uint8, grayscaled
     :param scale: scaling factor
     '''
 
-    #dimension of new image as tuple
-    dim = (int(img.shape[1]/scale) , int(img.shape[0]/scale))
+    # dimension of new image as tuple
 
-    return cv.resize(img, dim, interpolation = cv.INTER_AREA)
+
+    scale_min = 0.6
+    scale_max = 1.3
+
+    #create first image with lowest scale --> biggest picture comes first
+    dim = (int(img.shape[1] / scale_min), int(img.shape[0] / scale_min))
+    first = cv.resize(img, dim, interpolation=cv.INTER_AREA)
+
+    img_pyr = first.copy()
+
+    for scale in np.arange(scale_min+0.01, scale_max, 0.01):
+        dim = (int(img.shape[1] / scale), int(img.shape[0] / scale))
+        img_d = cv.resize(img, dim, interpolation=cv.INTER_AREA)
+
+        img_d_1 = np.pad(img_d, ((0, 0), (0, first.shape[1] - img_d.shape[1])), mode='constant', constant_values=(0))
+
+
+        img_pyr = np.concatenate((img_pyr, img_d_1))
+
+    # cv.imshow("", img_pyr)
+    # cv.waitKey(0)
+    return img_pyr
 
 
 
