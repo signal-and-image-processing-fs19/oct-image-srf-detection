@@ -22,6 +22,7 @@ import glob
 import itertools
 from tqdm import tqdm
 import oct_template_matching as tmpmatch
+import oct_evaluation as evaluate
 
 
 def main():
@@ -44,7 +45,7 @@ def run_one_setting():
                                            matching_method, denoise_strength, debug)
 
     # testing range of thresholds
-    tmpmatch.eval_precision(0, 6000000, 1000, best_scores_srf, best_scores_no, preproc_methods, matching_method)
+    evaluate.eval_precision(0, 6000000, 1000, best_scores_srf, best_scores_no, preproc_methods, matching_method)
 
 
 def run_all_combinations():
@@ -107,14 +108,14 @@ def run_all_combinations():
                     stp = 1000
 
                 # evaluate system for this set of settings
-                prec, auc = tmpmatch.eval_precision(low, upp, stp, best_scores_srf, best_scores_no,
+                prec, auc = evaluate.eval_precision(low, upp, stp, best_scores_srf, best_scores_no,
                                                     preproc_methods, matching_method, setting_string, stdout=False)
 
                 # add current result to the results dictionnary
                 results[setting_string] = (prec, auc)
 
     # save results
-    tmpmatch.sort_result_and_save_as_txt(results)
+    evaluate.sort_result_and_save_as_txt(results)
 
 
 if __name__ == '__main__':

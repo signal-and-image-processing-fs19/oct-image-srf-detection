@@ -18,13 +18,8 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 import cv2 as cv
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
-from tqdm import tqdm
 import oct_preprocessing as preproc
-from sklearn import metrics
-
-matplotlib.rcParams['image.cmap'] = 'gray'
+import oct_evaluation as evaluate
 
 
 def run_matching(image_paths, template_path, preprocessing_methods, matching_method='cv.TM_SQDIFF',
@@ -42,6 +37,7 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
     :param debug: boolean to enable debugging outputs (plots or print-statememts)
     :return: list of best matching score for each image
     """
+    # build template
     if template_path == '':
         template = preproc.load_preproc_template(template_path, preprocessing_methods, denoise_strength)
     else:
@@ -54,19 +50,25 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
         # preprocessing
         img = preproc.perform_bulk_perproc(img_orig, preprocessing_methods, denoise_strength)
 
+        # checking perprocessing step
         if debug:
-            plot_original_and_processed(img_orig, img, ', '.join(preprocessing_methods))
+            evaluate.plot_original_and_processed(img_orig, img, ', '.join(preprocessing_methods))
 
         # downscale image with scalefactor
         scale = 0.76
         img2 = pyramid(img, scale)
 
+        # checking pyramid step
         if debug:
-            plot_original_and_processed(img, img2)
+            evaluate.plot_original_and_processed(img, img2)
         img = img2
 
         # matching
         res, img = template_matching(img, template, matching_method)
+
+        # checking matching step
+        if debug:
+            evaluate.plot_original_and_processed(res, img)
 
         # store minimum value found (best match)
         # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
@@ -108,89 +110,6 @@ def template_matching(image, template, meth='cv.TM_SQDIFF'):
     cv.rectangle(img, top_left, bottom_right, 255, 2)
 
     return res, img
-
-
-def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods,
-                   matching_method, setting_string='', stdout=True):
-    """Evaluate precision of the system for a range of thresholds.
-
-    :param low: lower threshold boundary
-    :param upp: upper threshold boundary
-    :param stp: threshold step size
-    :param min_dist_srf: list of minimum distances of each SRF image
-    :param min_dist_no: list of minimum distances of each non-SRF image
-    :param preproc_methods: list of preprocessing method names (strings)
-    :param matching_method: matching method name (string)
-    """
-    precisions = []
-    for thresh in np.arange(low, upp, stp):
-        tp = 0
-        count = 0
-
-        for i in min_dist_srf:
-            count += 1
-            if i >= thresh:
-                tp += 1
-
-        for i in min_dist_no:
-            count += 1
-            if i < thresh:
-                tp += 1
-
-        # If the method is TM_SQDIFF or TM_SQDIFF_NORMED,
-        # smaller scores are better, else larger score are better matching.
-        # Thus inverse true positives
-        if matching_method in ['cv.TM_SQDIFF', 'cv.TM_SQDIFF_NORMED']:
-            tp = count - tp
-
-        precision = tp / count
-        precisions.append(precision)
-        # print(thresh, ':\t', precision, '% ', tp, '/', count)
-
-    best_prec = max(precisions)
-
-    if stdout:
-        print('Best precision:' + str(best_prec))
-
-    prec = sorted(precisions)
-    coord = np.arange(len(prec))*0.001
-    auc = metrics.auc(prec, coord)
-
-    if stdout:
-        print('auc: ', auc)
-
-    plt.plot(np.arange(low, upp, stp), precisions)
-    plt.xlabel('threshold ')
-    plt.ylabel('precision')
-    plt.title(', '.join(preproc_methods) + ', ' + matching_method +
-              '\nbest prec = {}, AUC = {}'.format(round(best_prec, 3), round(auc, 3)))
-
-    if stdout:
-        plt.show()
-    else:
-        plt.savefig('figures/' + setting_string + '.png')
-        plt.close()
-
-    return best_prec, auc
-
-
-def sort_result_and_save_as_txt(result):
-    with open('results.txt', 'w') as f:
-        f.write('setting:\t(prec, auc)\n')
-        for key, value in sorted(result.items(), key=lambda item: item[1], reverse=True):
-            f.write('{}:\t{}\n'.format(key, value))
-
-
-def plot_original_and_processed(original, processed, process_title=''):
-
-    fig, axs = plt.subplots(1, 2)
-
-    axs[0].imshow(original)
-    axs[0].set_title('original image')
-    axs[1].imshow(processed)
-    axs[1].set_title(process_title)
-
-    plt.show()
 
 
 def pyramid(img, scale):
