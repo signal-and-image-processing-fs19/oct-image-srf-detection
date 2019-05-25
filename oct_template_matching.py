@@ -18,13 +18,11 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 import cv2 as cv
 import numpy as np
-from skimage import io, color, transform
 import matplotlib
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import oct_preprocessing as preproc
 from sklearn import metrics
-
 
 matplotlib.rcParams['image.cmap'] = 'gray'
 
@@ -50,8 +48,7 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
         template = preproc.load_img_as_gray(template_path)
 
     best_scores = []
-    print('\nProcess and match images...\n')
-    for i in tqdm(image_paths):
+    for i in image_paths:
         img_orig = preproc.load_img_as_gray(i)
 
         # preprocessing
@@ -60,12 +57,13 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
         if debug:
             plot_original_and_processed(img_orig, img, ', '.join(preprocessing_methods))
 
-        #downscale image with scalefactor
+        # downscale image with scalefactor
         scale = 0.76
         img2 = pyramid(img, scale)
 
         if debug:
             plot_original_and_processed(img, img2)
+        img = img2
 
         # matching
         res, img = template_matching(img, template, matching_method)
@@ -112,7 +110,8 @@ def template_matching(image, template, meth='cv.TM_SQDIFF'):
     return res, img
 
 
-def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods, matching_method):
+def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods,
+                   matching_method, setting_string='', stdout=True):
     """Evaluate precision of the system for a range of thresholds.
 
     :param low: lower threshold boundary
@@ -124,8 +123,7 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods, ma
     :param matching_method: matching method name (string)
     """
     precisions = []
-    print('\nCalculating precision for thresholds {} to {}...\n'.format(low, upp))
-    for thresh in range(low, upp, stp):
+    for thresh in np.arange(low, upp, stp):
         tp = 0
         count = 0
 
@@ -149,19 +147,38 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods, ma
         precisions.append(precision)
         # print(thresh, ':\t', precision, '% ', tp, '/', count)
 
-    print('Best precision:' + str(max(precisions)))
+    best_prec = max(precisions)
+
+    if stdout:
+        print('Best precision:' + str(best_prec))
 
     prec = sorted(precisions)
     coord = np.arange(len(prec))*0.001
     auc = metrics.auc(prec, coord)
 
-    print( 'auc: ', auc)
+    if stdout:
+        print('auc: ', auc)
 
-    plt.plot(range(low//1000, upp//1000, stp//1000), precisions)
-    plt.xlabel('threshold (x1000)')
+    plt.plot(np.arange(low, upp, stp), precisions)
+    plt.xlabel('threshold ')
     plt.ylabel('precision')
-    plt.title(', '.join(preproc_methods) + ', ' + matching_method + '\nAUC = {}'.format(round(auc, 5)))
-    plt.show()
+    plt.title(', '.join(preproc_methods) + ', ' + matching_method +
+              '\nbest prec = {}, AUC = {}'.format(round(best_prec, 3), round(auc, 3)))
+
+    if stdout:
+        plt.show()
+    else:
+        plt.savefig('figures/' + setting_string + '.png')
+        plt.close()
+
+    return best_prec, auc
+
+
+def sort_result_and_save_as_txt(result):
+    with open('results.txt', 'w') as f:
+        f.write('setting:\t(prec, auc)\n')
+        for key, value in sorted(result.items(), key=lambda item: item[1], reverse=True):
+            f.write('{}:\t{}\n'.format(key, value))
 
 
 def plot_original_and_processed(original, processed, process_title=''):
@@ -177,18 +194,13 @@ def plot_original_and_processed(original, processed, process_title=''):
 
 
 def pyramid(img, scale):
-    '''
-    returns downscaled and smoothed image (with scikit-image)
+    """Returns downscaled and smoothed image (with scikit-image)
+
     :param img: image as uint8, grayscaled
     :param scale: scaling factor
-    '''
+    """
 
-    #dimension of new image as tuple
+    # dimension of new image as tuple
     dim = (int(img.shape[1]/scale) , int(img.shape[0]/scale))
 
     return cv.resize(img, dim, interpolation = cv.INTER_AREA)
-
-
-
-
-

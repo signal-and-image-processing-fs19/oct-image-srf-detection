@@ -52,7 +52,7 @@ def perform_bulk_perproc(image, preprocessing_methods, denoise_strength):
     if 'opening' in preprocessing_methods:
         img = opening_denoising(img, kernel_size=denoise_strength)
     if 'nonloc' in preprocessing_methods:
-        img = cv.fastNlMeansDenoising(img, h=denoise_strength)  # TODO: find best h (strength of denoising)
+        img = nonloc_denoising(img, denoise_strength)
     # TODO: add all other preprocessing options and decide on ordering
 
     return img
@@ -116,3 +116,7 @@ def opening_denoising(img, kernel_size=5):
     img_denoise = cv.morphologyEx(img, cv.MORPH_OPEN, kernel)
 
     return img_denoise
+
+
+def nonloc_denoising(img, denoise_strength):
+    return cv.fastNlMeansDenoising(img, h=denoise_strength)  # TODO: find best h (strength of denoising)
