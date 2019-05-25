@@ -23,7 +23,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import oct_preprocessing as preproc
-import imutils
+from sklearn import metrics
 
 
 matplotlib.rcParams['image.cmap'] = 'gray'
@@ -61,7 +61,7 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
             plot_original_and_processed(img_orig, img, ', '.join(preprocessing_methods))
 
         #downscale image with scalefactor
-        img = pyramid(img, 0.85)
+        img = pyramid(img, 0.75)
 
         # matching
         res, img = template_matching(img, template, matching_method)
@@ -147,10 +147,16 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods, ma
 
     print('Best precision:' + str(max(precisions)))
 
-    plt.plot(range(low//1000, upp//1000, stp//1000), precisions)
+
+    #calculate area under the curve
+    prec = sorted(precisions)
+    coord = np.arange(len(prec))*0.001
+    auc = metrics.auc(prec, coord)
+
+    plt.plot(range(low//1000, upp//1000, stp//1000), prec)
     plt.xlabel('threshold (x1000)')
     plt.ylabel('precision')
-    plt.title(', '.join(preproc_methods) + ', ' + matching_method)
+    plt.title(', '.join(preproc_methods) + ', ' + matching_method + '\nauc = {}'.format(round(auc, 5)))
     plt.show()
 
 
