@@ -23,7 +23,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import oct_preprocessing as preproc
-
+import imutils
 
 
 matplotlib.rcParams['image.cmap'] = 'gray'
@@ -59,6 +59,9 @@ def run_matching(image_paths, template_path, preprocessing_methods, matching_met
 
         if debug:
             plot_original_and_processed(img_orig, img, ', '.join(preprocessing_methods))
+
+        #downscale image with scalefactor
+        img = pyramid(img, 0.85)
 
         # matching
         res, img = template_matching(img, template, matching_method)
@@ -162,9 +165,20 @@ def plot_original_and_processed(original, processed, process_title=''):
 
     plt.show()
 
-def pyramid(img):
+
+def pyramid(img, scale):
     '''
     returns downscaled and smoothed image (with scikit-image)
     :param img: image as uint8, grayscaled
+    :param scale: scaling factor
     '''
-    return transform.pyramid_gaussian(img, downscale=2)
+
+    #dimension of new image as tuple
+    dim = (int(img.shape[1]/scale) , int(img.shape[0]/scale))
+
+    return cv.resize(img, dim, interpolation = cv.INTER_AREA)
+
+
+
+
+
