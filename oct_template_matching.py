@@ -122,8 +122,8 @@ def pyramid(img):
     """
 
     # dimension of new image as tuple
-    scale_min = 0.6
-    scale_max = 1.3
+    scale_min = 0.1
+    scale_max = 1
 
     # create first image with lowest scale --> biggest picture comes first
     dim = (int(img.shape[1] / scale_min), int(img.shape[0] / scale_min))
@@ -131,7 +131,7 @@ def pyramid(img):
 
     img_pyr = first.copy()
 
-    for scale in np.arange(scale_min+0.01, scale_max, 0.01):
+    for scale in np.arange(scale_min+0.01, scale_max, 0.1):
         dim = (int(img.shape[1] / scale), int(img.shape[0] / scale))
         img_d = cv.resize(img, dim, interpolation=cv.INTER_AREA)
 
