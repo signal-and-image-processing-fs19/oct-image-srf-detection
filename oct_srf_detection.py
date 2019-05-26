@@ -69,7 +69,7 @@ def run_all_combinations():
 
     # iterate over all preprocessing sets
     for preproc_methods in tqdm(preproc_sets):
-        print('Calculating with setting: {}'.format(preproc_methods))
+        print('\nCalculating with setting: {}'.format(preproc_methods))
 
         # ignore iterating over denoise strength if no denoising is performed in this set
         if {'opening', 'nonloc'} & set(preproc_methods):
@@ -80,11 +80,11 @@ def run_all_combinations():
 
         # iterate denoising strength
         for denoise_strength in tqdm(denoise_strengths):
-            print('denoise strength: {}'.format(denoise_strength))
+            print('\ndenoise strength: {}'.format(denoise_strength))
 
             # iterate over all matching methods
             for matching_method in all_matching_options:
-                print('matching method: {}'.format(matching_method))
+                print('\nmatching method: {}'.format(matching_method))
 
                 # build label for this run
                 setting_string = '_'.join(preproc_methods) + '_' + str(denoise_strength) + \
