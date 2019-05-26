@@ -20,6 +20,7 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 import glob
 import itertools
+import numpy as np
 from tqdm import tqdm
 import oct_template_matching as tmpmatch
 import oct_evaluation as evaluate

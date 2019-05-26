@@ -18,6 +18,8 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 import cv2 as cv
 import numpy as np
+from skimage import color
+from skimage.transform import pyramid_gaussian
 import oct_preprocessing as preproc
 import oct_evaluation as evaluate
 
@@ -117,7 +119,6 @@ def pyramid(img):
     """Returns downscaled and smoothed image (with scikit-image)
 
     :param img: image as uint8, grayscaled
-    :param scale: scaling factor
     """
 
     # dimension of new image as tuple
@@ -143,6 +144,22 @@ def pyramid(img):
     return img_pyr
 
 
+def fast_pyramid(img):
+    """Faster pyramid function, but limited by high scale factors, results in WORSE template matching."""
+    rows, cols = img.shape
+    pyrmd = tuple(pyramid_gaussian(img, downscale=2, multichannel=False))
 
+    composite_image = np.zeros((rows, cols + cols // 2), dtype=np.double)
 
+    composite_image[:rows, :cols] = pyrmd[0]
 
+    i_row = 0
+    for p in pyrmd[1:]:
+        n_rows, n_cols = p.shape[:2]
+        try:
+            composite_image[i_row:i_row + n_rows, cols:cols + n_cols] = p
+        except ValueError:
+            continue
+        i_row += n_rows
+
+    return (color.rgb2gray(composite_image) * 255).astype(np.uint8)
