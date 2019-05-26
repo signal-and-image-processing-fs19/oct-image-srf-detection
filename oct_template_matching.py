@@ -121,7 +121,7 @@ def pyramid(img):
     """
 
     # dimension of new image as tuple
-    scale_min = 0.1
+    scale_min = 0.5
     scale_max = 1
 
     # create first image with lowest scale --> biggest picture comes first

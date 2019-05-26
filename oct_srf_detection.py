@@ -56,7 +56,7 @@ def run_all_combinations():
     # constructing all preprocessing settings
     all_preproc_options = ['crop', 'eq', 'opening', 'nonloc']
     preproc_sets = []
-    for l in range(1,len(all_preproc_options)+1):
+    for l in range(1, len(all_preproc_options)+1):
         for subset in itertools.combinations(all_preproc_options, l):
             if subset[0] == 'crop':  # cropping should always happen!
                 preproc_sets.append(list(subset))
