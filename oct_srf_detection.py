@@ -33,10 +33,10 @@ def run_one_setting():
     images_srf = glob.glob('Train-Data/SRF/*')
     images_no = glob.glob('Train-Data/NoSRF/*')
     template_path = ''
-    preproc_methods = ['crop', 'eq', 'opening']
-    matching_method = 'cv.TM_SQDIFF'
-    denoise_strength = 7
-    debug = True
+    preproc_methods = ['crop', 'eq', 'nonloc']
+    matching_method = 'cv.TM_CCOEFF_NORMED'
+    denoise_strength = 23
+    debug = False
 
     best_scores_srf = tmpmatch.run_matching(images_srf, template_path, preproc_methods,
                                             matching_method, denoise_strength, debug)
@@ -45,7 +45,7 @@ def run_one_setting():
                                            matching_method, denoise_strength, debug)
 
     # testing range of thresholds
-    evaluate.eval_precision(0, 6000000, 1000, best_scores_srf, best_scores_no, preproc_methods, matching_method)
+    evaluate.eval_precision(0, 1, 0.0001, best_scores_srf, best_scores_no, preproc_methods, matching_method)
 
 
 def run_all_combinations():
@@ -119,5 +119,5 @@ def run_all_combinations():
 
 
 if __name__ == '__main__':
-    # run_one_setting()
-    run_all_combinations()
+    run_one_setting()
+    # run_all_combinations()
