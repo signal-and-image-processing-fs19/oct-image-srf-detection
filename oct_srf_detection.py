@@ -52,6 +52,7 @@ def main():
     print('\n\nBest precision: {}'.format(round(prec, 3)))
     print('at threshold: {}'.format(round(thresh, 3)))
     print('AUC: {}'.format(round(auc, 3)))
+    print('Saving threshold-plot in \'figures/\'...')
 
     # classify the images based on their score and the calculated threshold
     print('\nClassify results based on threshold {}...'.format(round(thresh, 3)))
@@ -155,7 +156,7 @@ def run_all_combinations():
 class Logger(object):
     def __init__(self):
         self.terminal = sys.stdout
-        self.log = open("test.log", "a")
+        self.log = open("log.dat", "a")
 
     def write(self, message):
         self.terminal.write(message)
