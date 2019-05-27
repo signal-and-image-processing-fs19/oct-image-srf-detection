@@ -19,9 +19,9 @@ __email__ = "dominik.meise@students.unibe.ch"
 
 
 import os
+import sys
 import glob
 import itertools
-import numpy as np
 from tqdm import tqdm
 import oct_template_matching as tmpmatch
 import oct_evaluation as evaluate
@@ -47,14 +47,14 @@ def main():
                                         matching_method, denoise_strength, debug)
 
     # calculate best threshold for the given method parameters
-    print('Calculate best threshold based on the training data...')
+    print('\n\nCalculate best threshold based on the training data...')
     prec, auc, thresh = evaluate.evaluate_threshold(template_path, preproc_methods, matching_method, denoise_strength)
-    print('Best precision: {}'.format(round(prec, 3)))
+    print('\n\nBest precision: {}'.format(round(prec, 3)))
     print('at threshold: {}'.format(round(thresh, 3)))
     print('AUC: {}'.format(round(auc, 3)))
 
     # classify the images based on their score and the calculated threshold
-    print('Classify results based on threshold {}...'.format(round(thresh, 3)))
+    print('\nClassify results based on threshold {}...'.format(round(thresh, 3)))
     img_classes = evaluate.classify_by_threshold(thresh, best_scores, matching_method)
 
     # create output file as specified in the Test-Data/submission_guidelines.txt
@@ -152,7 +152,18 @@ def run_all_combinations():
     evaluate.sort_result_and_save_as_txt(results)
 
 
+class Logger(object):
+    def __init__(self):
+        self.terminal = sys.stdout
+        self.log = open("test.log", "a")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+
+
 if __name__ == '__main__':
+    sys.stdout = Logger()
     # run_one_train_setting()
     # run_all_combinations()
     main()
