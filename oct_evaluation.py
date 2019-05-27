@@ -99,7 +99,7 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods,
 
 def sort_result_and_save_as_txt(result):
     """Sorting dict by value and then saving as a txt-file."""
-    with open('results_firstBigRun.txt', 'w') as f:
+    with open('results.txt', 'w') as f:
         f.write('setting:\t(prec, auc)\n')
         for key, value in sorted(result.items(), key=lambda item: item[1], reverse=True):
             f.write('{}:\t{}\n'.format(key, value))
