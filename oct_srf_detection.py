@@ -37,14 +37,30 @@ def main():
     denoise_strength = 23
     debug = False
 
+    # run template matching against all input images
+    print('Starting srf-detection of {} oct-images...'.format(len(image_paths)))
+    print('Set system parameters:')
+    print('\tPreprocessing methods: {}\n\tDenoise strength: {}\n\tMatching method: {}\n'.format(preproc_methods,
+                                                                                                denoise_strength,
+                                                                                                matching_method))
     best_scores = tmpmatch.run_matching(image_paths, template_path, preproc_methods,
                                         matching_method, denoise_strength, debug)
 
+    # calculate best threshold for the given method parameters
+    print('Calculate best threshold based on the training data...')
     prec, auc, thresh = evaluate.evaluate_threshold(template_path, preproc_methods, matching_method, denoise_strength)
+    print('Best precision: {}'.format(round(prec, 3)))
+    print('at threshold: {}'.format(round(thresh, 3)))
+    print('AUC: {}'.format(round(auc, 3)))
 
+    # classify the images based on their score and the calculated threshold
+    print('Classify results based on threshold {}...'.format(round(thresh, 3)))
     img_classes = evaluate.classify_by_threshold(thresh, best_scores, matching_method)
 
-    evaluate.write_csv(image_names, img_classes)
+    # create output file as specified in the Test-Data/submission_guidelines.txt
+    result_filename = 'project_Waelchli_Moser_Meise.csv'
+    print('Saving results in {}...'.format(result_filename))
+    evaluate.write_csv(image_names, img_classes, result_filename)
 
 
 def run_one_train_setting():

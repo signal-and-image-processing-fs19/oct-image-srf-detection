@@ -72,8 +72,8 @@ def classify_by_threshold(threshold, scores, matching_method):
     return img_classes.astype(int)
 
 
-def write_csv(image_names, img_classes):
-    with open('test.csv', 'w', newline='') as f:
+def write_csv(image_names, img_classes, filename):
+    with open(filename, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['filename', 'label'])
         writer.writerows(zip(image_names, img_classes))
