@@ -35,6 +35,7 @@ def main():
     preproc_methods = ['crop', 'eq', 'nonloc']
     matching_method = 'cv.TM_CCOEFF_NORMED'
     denoise_strength = 23
+    result_filename = 'project_Waelchli_Moser_Meise.csv'
     debug = False
 
     # run template matching against all input images
@@ -59,7 +60,6 @@ def main():
     img_classes = evaluate.classify_by_threshold(thresh, best_scores, matching_method)
 
     # create output file as specified in the Test-Data/submission_guidelines.txt
-    result_filename = 'project_Waelchli_Moser_Meise.csv'
     print('Saving results in {}...'.format(result_filename))
     evaluate.write_csv(image_names, img_classes, result_filename)
 
@@ -153,10 +153,12 @@ def run_all_combinations():
     evaluate.sort_result_and_save_as_txt(results)
 
 
+# Quick and dirty stdout copy to log file from stackoverflow:
+# https://stackoverflow.com/questions/616645/how-to-duplicate-sys-stdout-to-a-log-file
 class Logger(object):
     def __init__(self):
         self.terminal = sys.stdout
-        self.log = open("log.dat", "a")
+        self.log = open("log.dat", "w")
 
     def write(self, message):
         self.terminal.write(message)
