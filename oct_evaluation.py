@@ -16,16 +16,71 @@ __copyright__ = "Copyright 2019; Jan Wälchli, Mario Moser, Dominik Meise; All r
 __email__ = "dominik.meise@students.unibe.ch"
 
 
+import csv
+import glob
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from sklearn import metrics
+import oct_template_matching as tmpmatch
 
 matplotlib.rcParams['image.cmap'] = 'gray'
 
 
+def evaluate_threshold(template_path, preproc_methods, matching_method, denoise_strength):
+    images_srf = glob.glob('Train-Data/SRF/*')
+    images_no = glob.glob('Train-Data/NoSRF/*')
+
+    # build label for this run
+    setting_string = '_'.join(preproc_methods) + '_' + str(denoise_strength) + \
+                     '_' + matching_method
+
+    # run on all srf images
+    best_scores_srf = tmpmatch.run_matching(images_srf, template_path, preproc_methods,
+                                            matching_method, denoise_strength)
+    # run on all non-srf images
+    best_scores_no = tmpmatch.run_matching(images_no, template_path, preproc_methods,
+                                           matching_method, denoise_strength)
+
+    # testing range of thresholds
+    if 'NORMED' in matching_method:
+        low = 0
+        upp = 1
+        stp = 0.0001
+    else:
+        low = 0
+        upp = 10000000
+        stp = 1000
+
+    # evaluate system for this set of settings
+    prec, auc, thresh = eval_precision(low, upp, stp, best_scores_srf, best_scores_no,
+                               preproc_methods, matching_method, setting_string, stdout=False)
+
+    return prec, auc, thresh
+
+
+def classify_by_threshold(threshold, scores, matching_method):
+    img_classes = np.asarray(scores)
+
+    if 'SQDIFF' in matching_method:
+        img_classes[img_classes <= threshold] = 1
+        img_classes[img_classes > threshold] = 0
+    else:
+        img_classes[img_classes >= threshold] = 1
+        img_classes[img_classes < threshold] = 0
+
+    return img_classes.astype(int)
+
+
+def write_csv(image_names, img_classes):
+    with open('test.csv', 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['filename', 'label'])
+        writer.writerows(zip(image_names, img_classes))
+
+
 def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods,
-                   matching_method, setting_string='', stdout=True):
+                   matching_method, setting_string='default', stdout=True):
     """Evaluate precision of the system for a range of thresholds.
 
     :param low: lower threshold boundary
@@ -68,9 +123,7 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods,
         # print(thresh, ':\t', precision, '% ', tp, '/', count)
 
     best_prec = max(precisions)
-
-    if stdout:
-        print('Best precision:' + str(best_prec))
+    thresh = np.arange(low, upp, stp)[np.argmax(precisions)]
 
     # auc calculation
     prec = sorted(precisions)
@@ -78,6 +131,8 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods,
     auc = metrics.auc(prec, coord)
 
     if stdout:
+        print('Best precision:' + str(best_prec))
+        print('at threshold: ' + str(thresh))
         print('auc: ', auc)
 
     # plotting
@@ -85,7 +140,8 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods,
     plt.xlabel('threshold ')
     plt.ylabel('precision')
     plt.title(', '.join(preproc_methods) + ', ' + matching_method +
-              '\nbest prec = {}, AUC = {}'.format(round(best_prec, 3), round(auc, 3)))
+              '\nbest prec = {}, at threshold = {}, AUC = {}'.format(round(best_prec, 3),
+                                                                     round(thresh, 3), round(auc, 3)))
 
     # show results or save as txt
     if stdout:
@@ -94,7 +150,7 @@ def eval_precision(low, upp, stp, min_dist_srf, min_dist_no, preproc_methods,
         plt.savefig('figures/' + setting_string + '.png')
         plt.close()
 
-    return best_prec, auc
+    return best_prec, auc, thresh
 
 
 def sort_result_and_save_as_txt(result):

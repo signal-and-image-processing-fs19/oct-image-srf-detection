@@ -18,6 +18,7 @@ __copyright__ = "Copyright 2019; Jan Wälchli, Mario Moser, Dominik Meise; All r
 __email__ = "dominik.meise@students.unibe.ch"
 
 
+import os
 import glob
 import itertools
 import numpy as np
@@ -27,10 +28,26 @@ import oct_evaluation as evaluate
 
 
 def main():
-    pass
+    # the following settings are optimized according to the results from our training
+    image_paths = glob.glob('Test-Data/handout/*')
+    image_names = [os.path.basename(image_path) for image_path in image_paths]
+    template_path = ''  # leave empty to select the template used to optimize the system
+    preproc_methods = ['crop', 'eq', 'nonloc']
+    matching_method = 'cv.TM_CCOEFF_NORMED'
+    denoise_strength = 23
+    debug = False
+
+    best_scores = tmpmatch.run_matching(image_paths, template_path, preproc_methods,
+                                        matching_method, denoise_strength, debug)
+
+    prec, auc, thresh = evaluate.evaluate_threshold(template_path, preproc_methods, matching_method, denoise_strength)
+
+    img_classes = evaluate.classify_by_threshold(thresh, best_scores, matching_method)
+
+    evaluate.write_csv(image_names, img_classes)
 
 
-def run_one_setting():
+def run_one_train_setting():
     images_srf = glob.glob('Train-Data/SRF/*')
     images_no = glob.glob('Train-Data/NoSRF/*')
     template_path = ''
@@ -109,7 +126,7 @@ def run_all_combinations():
                     stp = 1000
 
                 # evaluate system for this set of settings
-                prec, auc = evaluate.eval_precision(low, upp, stp, best_scores_srf, best_scores_no,
+                prec, auc, thresh = evaluate.eval_precision(low, upp, stp, best_scores_srf, best_scores_no,
                                                     preproc_methods, matching_method, setting_string, stdout=False)
 
                 # add current result to the results dictionnary
@@ -120,5 +137,6 @@ def run_all_combinations():
 
 
 if __name__ == '__main__':
-    run_one_setting()
+    # run_one_train_setting()
     # run_all_combinations()
+    main()
