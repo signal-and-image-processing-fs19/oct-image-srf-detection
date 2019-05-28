@@ -27,6 +27,8 @@ import oct_template_matching as tmpmatch
 import oct_evaluation as evaluate
 
 
+# ======================================================================================================================
+# Final state of this program. Execute main() to solve the task.
 def main():
     # the following settings are optimized according to the results from our training
     image_paths = glob.glob('Test-Data/handout/*')
@@ -62,8 +64,10 @@ def main():
     # create output file as specified in the Test-Data/submission_guidelines.txt
     print('Saving results in {}...'.format(result_filename))
     evaluate.write_csv(image_names, img_classes, result_filename)
+# ======================================================================================================================
 
 
+# For single run testing purposes
 def run_one_train_setting():
     images_srf = glob.glob('Train-Data/SRF/*')
     images_no = glob.glob('Train-Data/NoSRF/*')
@@ -83,6 +87,7 @@ def run_one_train_setting():
     evaluate.eval_precision(0, 1, 0.0001, best_scores_srf, best_scores_no, preproc_methods, matching_method)
 
 
+# For batch testing and parameter optimization
 def run_all_combinations():
     images_srf = glob.glob('Train-Data/SRF/*')
     images_no = glob.glob('Train-Data/NoSRF/*')
@@ -153,7 +158,7 @@ def run_all_combinations():
     evaluate.sort_result_and_save_as_txt(results)
 
 
-# Quick and dirty stdout copy to log file from stackoverflow:
+# Quick and dirty 'stdout copy to log file' from stackoverflow:
 # https://stackoverflow.com/questions/616645/how-to-duplicate-sys-stdout-to-a-log-file
 class Logger(object):
     def __init__(self):

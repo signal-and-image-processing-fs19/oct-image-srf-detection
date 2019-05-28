@@ -28,7 +28,7 @@ def load_img_as_gray(img_path):
     return (color.rgb2gray(img) * 255).astype(np.uint8)
 
 
-def load_preproc_template(template_path, preproc_methods, denoise_strength):
+def load_preproc_template(preproc_methods, denoise_strength):
     """Create template from fixed region of the first train-data srf image, but with the given preprocessing applied."""
     tmpl = load_img_as_gray('Train-Data/SRF/input_1492_1.png')
     tmpl = perform_bulk_perproc(tmpl, preproc_methods, denoise_strength)
@@ -53,7 +53,6 @@ def perform_bulk_perproc(image, preprocessing_methods, denoise_strength):
         img = opening_denoising(img, kernel_size=denoise_strength)
     if 'nonloc' in preprocessing_methods:
         img = nonloc_denoising(img, denoise_strength)
-    # TODO: add all other preprocessing options and decide on ordering
 
     return img
 
@@ -119,4 +118,4 @@ def opening_denoising(img, kernel_size=5):
 
 
 def nonloc_denoising(img, denoise_strength):
-    return cv.fastNlMeansDenoising(img, h=denoise_strength)  # TODO: find best h (strength of denoising)
+    return cv.fastNlMeansDenoising(img, h=denoise_strength)

@@ -28,6 +28,17 @@ matplotlib.rcParams['image.cmap'] = 'gray'
 
 
 def evaluate_threshold(template_path, preproc_methods, matching_method, denoise_strength):
+    """Determine the optimal threshold based on the given preprocessing and matching methods and the template used.
+
+    :param template_path: Filepath of the template used for matching
+    :param preproc_methods: list of strings of the used preprocessing methods
+    :param matching_method: method used for template matching
+    :param denoise_strength: integer value which set the degree of denoising applied during preprocessing
+    :return: prec: highest precision achieved for the defined range of thresholds for the available train-data
+             auc: area under the curve value for the defined range of thresholds
+             thresh: the threshold value which achieved the highest precision for the available train-data
+    """
+    # load available train-data
     images_srf = glob.glob('Train-Data/SRF/*')
     images_no = glob.glob('Train-Data/NoSRF/*')
 
@@ -54,12 +65,19 @@ def evaluate_threshold(template_path, preproc_methods, matching_method, denoise_
 
     # evaluate system for this set of settings
     prec, auc, thresh = eval_precision(low, upp, stp, best_scores_srf, best_scores_no,
-                               preproc_methods, matching_method, setting_string, stdout=False)
+                                       preproc_methods, matching_method, setting_string, stdout=False)
 
     return prec, auc, thresh
 
 
 def classify_by_threshold(threshold, scores, matching_method):
+    """Classifies each score based on the given threshold.
+
+    :param threshold: given (ideally optimized) threshold to discriminate the two classes
+    :param scores: dissimilatiry or distance scores to classify
+    :param matching_method: method used for template matching (determines which class lies on which side of the thresh)
+    :return: list of same length as input with score values replaced by 0 or 1 depending on the classification
+    """
     img_classes = np.asarray(scores)
 
     if 'SQDIFF' in matching_method:
@@ -73,6 +91,7 @@ def classify_by_threshold(threshold, scores, matching_method):
 
 
 def write_csv(image_names, img_classes, filename):
+    """Produce csv output file according to the project specifications from a list of image names and classification."""
     with open(filename, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['filename', 'label'])
