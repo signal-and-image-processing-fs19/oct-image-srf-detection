@@ -1,5 +1,6 @@
 # OCT image SRF detection
-Final group project of the signal and image processing course.
+Final group project of the signal and image processing course.<br>
+https://github.com/signal-and-image-processing-fs19/oct-image-srf-detection.git
 
 ## Task ##
 The goal is to find a image processing solution to detect from OCT images, if it shows SRF (subretinal fluid) which is
