@@ -1,0 +1,30 @@
+https://stackoverflow.com/questions/48799711/explain-difference-between-opencvs-template-matching-methods-in-non-mathematica
+
+The general idea of template matching is to give each location in the target image I,
+a similarity measure, or score, for the given template T. The output of this process is the image R.
+
+Each element in R is computed from the template, which spans over the ranges of x' and y', and a window in I of the same size.
+
+Now, you have two windows and you want to know how similar they are:
+
+CV_TM_SQDIFF - Sum of Square Differences (or SSD):
+Simple euclidian distance (squared):
+
+Take every pair of pixels and subtract
+Square the difference
+Sum all the squares
+CV_TM_SQDIFF_NORMED - SSD Normed
+This is rarely used in practice, but the normalization part is similar in the next methods.
+
+The nominator term is same as above, but divided by a factor, computed from the - square root of the product of:
+
+sum of the template, squared
+sum of the image window, squared
+CV_TM_CCORR - Cross Correlation
+Basically, this is a dot product:
+
+Take every pair of pixels and multiply
+Sum all products
+CV_TM_CCOEFF - Cross Coefficient
+Similar to Cross Correlation, but normalized with their Covariances (which I find hard to explain without math.
+But I would refer to mathworld or mathworks for some examples
