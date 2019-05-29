@@ -1,3 +1,7 @@
+# paper of the method used:
+https://www.researchgate.net/publication/228940930_Template_matching_using_fast_normalized_cross_correlation
+
+# quick stackoverflow explanation
 https://stackoverflow.com/questions/48799711/explain-difference-between-opencvs-template-matching-methods-in-non-mathematica
 
 The general idea of template matching is to give each location in the target image I,
